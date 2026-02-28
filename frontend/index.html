@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AntiFraud CRM — Казахстан</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Unbounded:wght@300;400;600;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/main.css?v=1772286820"/>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <polygon points="14,2 26,8 26,20 14,26 2,20 2,8" stroke="#00ff87" stroke-width="1.5" fill="none"/>
+        <polygon points="14,7 21,11 21,17 14,21 7,17 7,11" stroke="#00ff87" stroke-width="1" fill="#00ff8712"/>
+        <circle cx="14" cy="14" r="3" fill="#00ff87"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="logo-title">ANTIFRAUD</span>
+      <span class="logo-sub">CRM SYSTEM · KZ</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">ОПЕРАЦИИ</div>
+    <a class="nav-item active" data-page="upload" href="#upload">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Загрузка CSV
+    </a>
+    <a class="nav-item" data-page="transactions" href="#transactions">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Транзакции
+    </a>
+    <a class="nav-item" data-page="fraud" href="#fraud">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Мошенничество
+      <span class="nav-badge" id="fraud-badge">—</span>
+    </a>
+    <div class="nav-section-label" style="margin-top:16px">АНАЛИТИКА</div>
+    <a class="nav-item" data-page="dashboard" href="#dashboard">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="8" height="11" rx="1"/><rect x="14" y="3" width="8" height="5" rx="1"/><rect x="14" y="12" width="8" height="9" rx="1"/><rect x="2" y="18" width="8" height="3" rx="1"/></svg>
+      Дашборд
+    </a>
+    <a class="nav-item" data-page="eda" href="#eda">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      EDA Анализ
+    </a>
+  </nav>
+  <div class="sidebar-status">
+    <div class="status-dot" id="api-dot"></div>
+    <span id="api-status">Подключение...</span>
+  </div>
+</aside>
+
+<main class="main-content">
+
+  <!-- ══ UPLOAD ══════════════════════════════════════════════ -->
+  <div class="page active" id="page-upload">
+    <div class="page-header">
+      <h1 class="page-title">Загрузка транзакций</h1>
+      <p class="page-desc">ETL обработка CSV файла с транзакциями казахстанских банков</p>
+    </div>
+    <div class="upload-area" id="drop-zone">
+      <div class="upload-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17,8 12,3 7,8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <p class="upload-text">Перетащите CSV файл сюда</p>
+      <p class="upload-sub">или</p>
+      <label class="btn-primary" for="csv-input">Выбрать файл</label>
+      <input type="file" id="csv-input" accept=".csv" style="display:none"/>
+      <p class="upload-hint">Формат: транзакции казахстанских банков (тенге)</p>
+    </div>
+    <div class="etl-progress" id="etl-progress" style="display:none">
+      <div class="etl-stages">
+        <div class="etl-stage" id="stage-extract"><div class="stage-icon">📥</div><div class="stage-label">EXTRACT</div><div class="stage-status">Чтение файла</div></div>
+        <div class="stage-arrow">→</div>
+        <div class="etl-stage" id="stage-transform"><div class="stage-icon">⚙️</div><div class="stage-label">TRANSFORM</div><div class="stage-status">Очистка данных</div></div>
+        <div class="stage-arrow">→</div>
+        <div class="etl-stage" id="stage-load"><div class="stage-icon">💾</div><div class="stage-label">LOAD</div><div class="stage-status">Запись в БД</div></div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    </div>
+    <div class="etl-result" id="etl-result" style="display:none"></div>
+    <div class="card" style="margin-top:32px">
+      <div class="card-header">
+        <span class="card-title">История загрузок</span>
+        <button class="btn-ghost" onclick="loadEtlLogs()">Обновить</button>
+      </div>
+      <div id="etl-logs-table"></div>
+    </div>
+  </div>
+
+  <!-- ══ TRANSACTIONS ════════════════════════════════════════ -->
+  <div class="page" id="page-transactions">
+    <div class="page-header">
+      <h1 class="page-title">Транзакции</h1>
+      <p class="page-desc">Полный реестр транзакций</p>
+    </div>
+    <div class="filters-bar">
+      <input type="text"  class="filter-input" id="f-tx-id"     placeholder="ID транзакции..."/>
+      <input type="text"  class="filter-input" id="f-client-id" placeholder="ИИН клиента..."/>
+      <select class="filter-select" id="f-bank"><option value="">Все банки</option></select>
+      <select class="filter-select" id="f-status">
+        <option value="">Все статусы</option>
+        <option value="completed">Completed</option>
+        <option value="pending">Pending</option>
+        <option value="failed">Failed</option>
+      </select>
+      <input type="date" class="filter-input" id="f-date-from"/>
+      <input type="date" class="filter-input" id="f-date-to"/>
+      <button class="btn-primary" onclick="searchTransactions()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Найти
+      </button>
+      <button class="btn-ghost" onclick="clearFilters('tx')">Сброс</button>
+    </div>
+
+    <div class="table-toolbar">
+      <span class="record-count" id="tx-count"></span>
+      <button class="btn-export" id="btn-export-tx" onclick="downloadCSV('btn-export-tx')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Скачать CSV
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="sort-th" data-col="transaction_id"  onclick="sortBy('tx','transaction_id')">ID <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="client_id"       onclick="sortBy('tx','client_id')">ИИН <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="bank"            onclick="sortBy('tx','bank')">Банк <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="amount_kzt"      onclick="sortBy('tx','amount_kzt')">Сумма (₸) <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="category"        onclick="sortBy('tx','category')">Категория <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="city"            onclick="sortBy('tx','city')">Город <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="device_type"     onclick="sortBy('tx','device_type')">Устройство <span class="sort-icon">↕</span></th>
+            <th class="sort-th sort-active" data-col="transaction_date" onclick="sortBy('tx','transaction_date')">Дата <span class="sort-icon">↓</span></th>
+            <th class="sort-th" data-col="status"          onclick="sortBy('tx','status')">Статус <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="is_fraud"        onclick="sortBy('tx','is_fraud')">Фрод <span class="sort-icon">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="tx-body">
+          <tr><td colspan="10"><div class="empty-state"><p>Перейдите на эту страницу для загрузки данных</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="tx-pagination"></div>
+  </div>
+
+  <!-- ══ FRAUD ═══════════════════════════════════════════════ -->
+  <div class="page" id="page-fraud">
+    <div class="page-header">
+      <h1 class="page-title" style="color:var(--red)">⚠ Мошеннические транзакции</h1>
+      <p class="page-desc">Транзакции с признаком is_fraud = 1</p>
+    </div>
+    <div class="filters-bar">
+      <input type="text" class="filter-input" id="ff-tx-id"     placeholder="ID транзакции..."/>
+      <input type="text" class="filter-input" id="ff-client-id" placeholder="ИИН клиента..."/>
+      <select class="filter-select" id="ff-bank"><option value="">Все банки</option></select>
+      <button class="btn-danger" onclick="searchFraud()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Найти
+      </button>
+      <button class="btn-ghost" onclick="clearFilters('fraud')">Сброс</button>
+    </div>
+
+    <div class="table-toolbar">
+      <span class="record-count" id="fraud-count"></span>
+      <button class="btn-export" id="btn-export-fraud" onclick="downloadCSV('btn-export-fraud')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Скачать CSV
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="sort-th" data-col="transaction_id" onclick="sortBy('fraud','transaction_id')">ID <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="client_id"      onclick="sortBy('fraud','client_id')">ИИН <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="bank"           onclick="sortBy('fraud','bank')">Банк <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="amount_kzt"     onclick="sortBy('fraud','amount_kzt')">Сумма (₸) <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="category"       onclick="sortBy('fraud','category')">Категория <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="city"           onclick="sortBy('fraud','city')">Город <span class="sort-icon">↕</span></th>
+            <th class="sort-th" data-col="fraud_reason"   onclick="sortBy('fraud','fraud_reason')">Причина <span class="sort-icon">↕</span></th>
+            <th class="sort-th sort-active" data-col="transaction_date" onclick="sortBy('fraud','transaction_date')">Дата <span class="sort-icon">↓</span></th>
+            <th class="sort-th" data-col="status"         onclick="sortBy('fraud','status')">Статус <span class="sort-icon">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="fraud-body">
+          <tr><td colspan="9"><div class="empty-state"><p>Перейдите на эту страницу для загрузки данных</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="fraud-pagination"></div>
+  </div>
+
+  <!-- ══ DASHBOARD ═══════════════════════════════════════════ -->
+  <div class="page" id="page-dashboard">
+    <div class="page-header">
+      <h1 class="page-title">Дашборд</h1>
+      <p class="page-desc">Сводная аналитика по транзакциям</p>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Всего транзакций</div><div class="kpi-value" id="kpi-total">—</div></div>
+      <div class="kpi-card kpi-red"><div class="kpi-label">Мошеннических</div><div class="kpi-value" id="kpi-fraud">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Уровень фрода</div><div class="kpi-value" id="kpi-rate">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Уникальных клиентов</div><div class="kpi-value" id="kpi-clients">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Оборот (₸)</div><div class="kpi-value" id="kpi-amount">—</div></div>
+      <div class="kpi-card kpi-red"><div class="kpi-label">Сумма фрода (₸)</div><div class="kpi-value" id="kpi-fraud-amount">—</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="card chart-card col-2">
+        <div class="card-header">
+          <span class="card-title">Транзакции по дням</span>
+          <select id="days-select" class="filter-select" style="width:120px" onchange="loadByDate()">
+            <option value="30">30 дней</option><option value="90" selected>90 дней</option>
+            <option value="180">180 дней</option><option value="365">365 дней</option>
+          </select>
+        </div>
+        <canvas id="chart-by-date" height="220"></canvas>
+      </div>
+      <div class="card chart-card"><div class="card-header"><span class="card-title">По банкам</span></div><canvas id="chart-by-bank" height="260"></canvas></div>
+      <div class="card chart-card"><div class="card-header"><span class="card-title">По устройствам</span></div><canvas id="chart-by-device" height="260"></canvas></div>
+      <div class="card chart-card"><div class="card-header"><span class="card-title">Активность по часам</span></div><canvas id="chart-by-hour" height="260"></canvas></div>
+      <div class="card chart-card"><div class="card-header"><span class="card-title">По категориям</span></div><canvas id="chart-by-category" height="260"></canvas></div>
+      <div class="card chart-card"><div class="card-header"><span class="card-title">Причины фрода</span></div><canvas id="chart-fraud-reasons" height="260"></canvas></div>
+      <div class="card chart-card"><div class="card-header"><span class="card-title">Топ городов</span></div><canvas id="chart-by-city" height="260"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ══ EDA ═════════════════════════════════════════════════ -->
+  <div class="page" id="page-eda">
+    <div class="page-header">
+      <h1 class="page-title">EDA — Анализ данных</h1>
+      <p class="page-desc">Exploratory Data Analysis транзакционных данных</p>
+    </div>
+    <div class="eda-grid">
+      <div class="card eda-card col-2"><div class="card-header"><span class="card-title">Описательная статистика сумм (₸)</span></div><div class="stats-row" id="eda-amount-stats"></div></div>
+      <div class="card chart-card col-2"><div class="card-header"><span class="card-title">Гистограмма: распределение сумм</span></div><canvas id="chart-amount-dist" height="220"></canvas></div>
+      <div class="card chart-card col-2"><div class="card-header"><span class="card-title">Уровень фрода по банкам (%)</span></div><canvas id="chart-bank-fraud-rate" height="260"></canvas></div>
+      <div class="card eda-card col-2"><div class="card-header"><span class="card-title">Топ-10 клиентов по активности</span></div><div id="top-clients-table"></div></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/static/js/app.js?v=1772286820"></script>
+</body>
+</html>
