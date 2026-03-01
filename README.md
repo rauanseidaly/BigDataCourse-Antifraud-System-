@@ -19,7 +19,7 @@ The goal of this project is to build an analytical system that processes transac
 - Jupyter Notebook
 
 ## Project Structure
-project-root/
+antifraud-system/
 │
 ├── backend/
 │   ├── main.py                # Application entry point
@@ -35,7 +35,7 @@ project-root/
 │   └── js/
 │       └── app.js             # Frontend logic
 │
-├── data/                      # Datasets and raw data
+└── data/                      # Datasets and raw data
 
 ## Documentation
 Documentation is here: Документаия_СРС_BigData_СейдалыРауан.pdf
