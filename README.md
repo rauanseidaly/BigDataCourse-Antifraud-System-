@@ -20,14 +20,17 @@ The goal of this project is to build an analytical system that processes transac
 
 ## Project Structure
 antifraud-system
+
 /backend
 - /main.py                # Application entry point
 - db/ database.py          # Database connection and configuration
-- etl/pipeline.py          # ETL data processing pipeline
+- etl/pipeline.py  # ETL data processing pipeline
+
 frontend/
 - index.html             # Main web interface
 - css/main.css             # Styles
 - js/ppp.js               # Frontend logic3
+
 data/                    # Datasets and raw data
 
 ## Documentation
